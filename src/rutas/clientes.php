@@ -4,8 +4,20 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 $app = new \Slim\App;
 
+$app->options('/{routes:.+}', function ($request, $response, $args) {
+    return $response;
+});
+
+$app->add(function ($req, $res, $next) {
+    $response = $next($req, $res);
+    return $response
+            ->withHeader('Access-Control-Allow-Origin', '*')
+            ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+            ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+});
+
 //GET Todos los clientes
-$app->get('/api/clientes', function(Request $request, Response $response){
+$app->get('/api/clientes/', function(Request $request, Response $response){
     $sql = "SELECT * FROM test_michelsen.cliente";
     try{
         $db = new db();
@@ -26,7 +38,7 @@ $app->get('/api/clientes', function(Request $request, Response $response){
 
 
 //GET Recuperar cliente por ID
-$app->get('/api/clientes/{id}', function(Request $request, Response $response){
+$app->get('/api/clientes/{id}/', function(Request $request, Response $response){
     $idCliente = $request->getAttribute('id');
     $sql = "SELECT * FROM test_michelsen.cliente WHERE IdCln = $idCliente";
     try{
@@ -47,7 +59,7 @@ $app->get('/api/clientes/{id}', function(Request $request, Response $response){
 });
 
 //POST Crear nuevo cliente
-$app->post('/api/clientes/nuevo', function(Request $request, Response $response){
+$app->post('/api/clientes/nuevo/', function(Request $request, Response $response){
     $nombre = $request->getParam('nombre');
     $prApellido = $request->getParam('prApellido');
     $sgApellido = $request->getParam('sgApellido');
@@ -81,7 +93,7 @@ $app->post('/api/clientes/nuevo', function(Request $request, Response $response)
 
 
 //PUT modificar cliente
-$app->put('/api/clientes/modificar/{id}', function(Request $request, Response $response){
+$app->put('/api/clientes/modificar/{id}/', function(Request $request, Response $response){
     $id_cliente = $request->getAttribute('id');
     $nombre = $request->getParam('nombre');
     $prApellido = $request->getParam('prApellido');
@@ -123,7 +135,7 @@ $app->put('/api/clientes/modificar/{id}', function(Request $request, Response $r
 
 
 //DELETE borrar cliente
-$app->delete('/api/clientes/delete/{id}', function(Request $request, Response $response){
+$app->delete('/api/clientes/delete/{id}/', function(Request $request, Response $response){
     $id_cliente = $request->getAttribute('id');
     
     $sql = "DELETE FROM test_michelsen.cliente WHERE IdCln = $id_cliente";
@@ -142,6 +154,30 @@ $app->delete('/api/clientes/delete/{id}', function(Request $request, Response $r
         
 
         
+        $resultado = null;
+        $db = null;
+    }catch(PDOException $e){
+        echo '{"error" : {"text":'.$e->getMessage().'}';
+    }
+});
+
+
+//GET Login usuario
+$app->get('/api/clientes/login/{email}/{document}/', function(Request $request, Response $response){
+    $emailCliente = $request->getAttribute('email');
+    $docuCliente = $request->getAttribute('document');
+
+    $sql = "SELECT * FROM test_michelsen.cliente WHERE emailCln = $emailCliente AND DocuCln = $docuCliente";
+    try{
+        $db = new db();
+        $db = $db->connectDB();
+        $resultado = $db->query($sql);
+        if($resultado->rowCount() > 0){
+            $clientes = $resultado->fetchAll(PDO::FETCH_OBJ);
+            echo json_encode($clientes);
+        } else {
+            echo json_encode("No existe este usuario");
+        }
         $resultado = null;
         $db = null;
     }catch(PDOException $e){
