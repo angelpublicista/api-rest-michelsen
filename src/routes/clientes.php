@@ -12,6 +12,7 @@ $app->add(function ($req, $res, $next) {
     $response = $next($req, $res);
     return $response
             ->withHeader('Access-Control-Allow-Origin', '*')
+            ->withHeader('Content-Type', 'application / json; charset = utf-8')
             ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
             ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
 });
@@ -176,11 +177,12 @@ $app->get('/api/clientes/login/{email}/{document}/', function(Request $request, 
             $clientes = $resultado->fetchAll(PDO::FETCH_OBJ);
             echo json_encode($clientes);
         } else {
-            echo json_encode("No existe este usuario");
+            return null;
         }
         $resultado = null;
         $db = null;
     }catch(PDOException $e){
+        return null;
         echo '{"error" : {"text":'.$e->getMessage().'}';
     }
 });
