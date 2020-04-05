@@ -186,3 +186,47 @@ $app->get('/api/clientes/login/{email}/{document}/', function(Request $request, 
         echo '{"error" : {"text":'.$e->getMessage().'}';
     }
 });
+
+
+
+//GET Todos los créditos
+$app->get('/api/creditos/', function(Request $request, Response $response){
+    $sql = "SELECT * FROM test_michelsen.credito";
+    try{
+        $db = new db();
+        $db = $db->connectDB();
+        $resultado = $db->query($sql);
+        if($resultado->rowCount() > 0){
+            $creditos = $resultado->fetchAll(PDO::FETCH_OBJ);
+            echo json_encode($creditos);
+        } else {
+            echo json_encode("No existen créditos en la base de datos");
+        }
+        $resultado = null;
+        $db = null;
+    }catch(PDOException $e){
+        echo '{"error" : {"text":'.$e->getMessage().'}';
+    }
+});
+
+
+//GET Recuperar credito por IDCliente
+$app->get('/api/creditos/{idCl}/', function(Request $request, Response $response){
+    $idCliente = $request->getAttribute('idCl');
+    $sql = "SELECT * FROM test_michelsen.credito WHERE IdCln = $idCliente";
+    try{
+        $db = new db();
+        $db = $db->connectDB();
+        $resultado = $db->query($sql);
+        if($resultado->rowCount() > 0){
+            $creditos = $resultado->fetchAll(PDO::FETCH_OBJ);
+            echo json_encode($creditos);
+        } else {
+            echo json_encode("No existen créditos para este cliente");
+        }
+        $resultado = null;
+        $db = null;
+    }catch(PDOException $e){
+        echo '{"error" : {"text":'.$e->getMessage().'}';
+    }
+});

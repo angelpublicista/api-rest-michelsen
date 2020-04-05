@@ -6,10 +6,8 @@ require './../src/config/db.php';
 
 $app = new \Slim\App;
 
-
 // Define app routes
 require './../src/routes/clientes.php';
-require './../src/routes/creditos.php';
 
 // Run app
 $app->run();
