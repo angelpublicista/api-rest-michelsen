@@ -17,6 +17,11 @@ $app->add(function ($req, $res, $next) {
             ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
 });
 
+
+/*===========================================
+************** TABLA CLIENTES ****************
+=============================================*/
+
 //GET Todos los clientes
 $app->get('/api/clientes/', function(Request $request, Response $response){
     $sql = "SELECT * FROM test_michelsen.cliente";
@@ -188,6 +193,9 @@ $app->get('/api/clientes/login/{email}/{document}/', function(Request $request, 
 });
 
 
+/*===========================================
+************** TABLA CRÉDITOS ****************
+=============================================*/
 
 //GET Todos los créditos
 $app->get('/api/creditos/', function(Request $request, Response $response){
@@ -200,7 +208,7 @@ $app->get('/api/creditos/', function(Request $request, Response $response){
             $creditos = $resultado->fetchAll(PDO::FETCH_OBJ);
             echo json_encode($creditos);
         } else {
-            echo json_encode("No existen créditos en la base de datos");
+           return null;
         }
         $resultado = null;
         $db = null;
@@ -222,7 +230,34 @@ $app->get('/api/creditos/{idCl}/', function(Request $request, Response $response
             $creditos = $resultado->fetchAll(PDO::FETCH_OBJ);
             echo json_encode($creditos);
         } else {
-            echo json_encode("No existen créditos para este cliente");
+            return $response->withStatus(500)
+            ->withHeader('Content-Type', 'text/json')
+            ->write('Something went wrong!');
+        }
+        $resultado = null;
+        $db = null;
+    }catch(PDOException $e){
+        echo '{"error" : {"text":'.$e->getMessage().'}';
+    }
+});
+
+/*===========================================
+************** TABLA PLANES ****************
+=============================================*/
+
+//GET Recuperar cuotas por crédito
+$app->get('/api/creditos/cuotas/{numCrd}/', function(Request $request, Response $response){
+    $NumCrd = $request->getAttribute('numCrd');
+    $sql = "SELECT * FROM test_michelsen.planes WHERE NumCrd = $NumCrd";
+    try{
+        $db = new db();
+        $db = $db->connectDB();
+        $resultado = $db->query($sql);
+        if($resultado->rowCount() > 0){
+            $cuotas = $resultado->fetchAll(PDO::FETCH_OBJ);
+            echo json_encode($cuotas);
+        } else {
+            return null;
         }
         $resultado = null;
         $db = null;
