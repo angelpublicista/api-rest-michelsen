@@ -12,26 +12,30 @@ $app->add(function ($req, $res, $next) {
     $response = $next($req, $res);
     return $response
             ->withHeader('Access-Control-Allow-Origin', '*')
-            ->withHeader('Content-Type', 'application / json; charset = utf-8')
+            ->withHeader('Content-Type', 'application/json')
             ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
             ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
 });
+
 
 
 /*===========================================
 ************** TABLA CLIENTES ****************
 =============================================*/
 
+
 //GET Todos los clientes
 $app->get('/api/clientes/', function(Request $request, Response $response){
-    $sql = "SELECT * FROM test_michelsen.cliente";
+    $sql = utf8_encode("SELECT * FROM cliente");
     try{
         $db = new db();
         $db = $db->connectDB();
         $resultado = $db->query($sql);
-        if($resultado->rowCount() > 0){
+        
+        if($resultado){
             $clientes = $resultado->fetchAll(PDO::FETCH_OBJ);
-            echo json_encode($clientes);
+            //var_dump($clientes);
+            echo json_encode($clientes, JSON_UNESCAPED_UNICODE);
         } else {
             echo json_encode("No existen clientes en la base de datos");
         }
