@@ -26,7 +26,7 @@ $app->add(function ($req, $res, $next) {
 
 //GET Todos los clientes
 $app->get('/api/clientes/', function(Request $request, Response $response){
-    $sql = utf8_encode("SELECT * FROM cliente");
+    $sql = utf8_encode("SELECT IdCln, PrApellidoCln, SgApellidoCln, NomCln, emailCln, TelResidenciaCln, CelularCln FROM cliente");
     try{
         $db = new db();
         $db = $db->connectDB();
@@ -125,6 +125,48 @@ $app->get('/api/creditos/{idCl}/', function(Request $request, Response $response
 $app->get('/api/creditos/cuotas/{numCrd}/', function(Request $request, Response $response){
     $NumCrd = $request->getAttribute('numCrd');
     $sql = "SELECT * FROM planes WHERE NumCrd = $NumCrd";
+    try{
+        $db = new db();
+        $db = $db->connectDB();
+        $resultado = $db->query($sql);
+        if($resultado){
+            $cuotas = $resultado->fetchAll(PDO::FETCH_OBJ);
+            echo json_encode($cuotas);
+        } else {
+            return null;
+        }
+        $resultado = null;
+        $db = null;
+    }catch(PDOException $e){
+        echo '{"error" : {"text":'.$e->getMessage().'}';
+    }
+});
+
+//GET saldo crédito
+$app->get('/api/creditos/saldo/{idCl}/', function(Request $request, Response $response){
+    $idCln = $request->getAttribute('idCl');
+    $sql = "SELECT NumCrd, EstadoCrd, IdCln, FchCrd, TtlDesembolsadoCrd, TtlAbonadoCapitalCrd, TtlDesembolsadoCrd - TtlAbonadoCapitalCrd AS Saldo FROM credito  WHERE EstadoCrd = '6' AND IdCln = $idCln";
+    try{
+        $db = new db();
+        $db = $db->connectDB();
+        $resultado = $db->query($sql);
+        if($resultado){
+            $cuotas = $resultado->fetchAll(PDO::FETCH_OBJ);
+            echo json_encode($cuotas);
+        } else {
+            return null;
+        }
+        $resultado = null;
+        $db = null;
+    }catch(PDOException $e){
+        echo '{"error" : {"text":'.$e->getMessage().'}';
+    }
+});
+
+//GET planes
+$app->get('/api/creditos/planes/{numCrd}/', function(Request $request, Response $response){
+    $numCrd = $request->getAttribute('numCrd');
+    $sql = "SELECT NumCrd, Fecha, Cuota, Capital FROM planes WHERE NumCrd = $numCrd";
     try{
         $db = new db();
         $db = $db->connectDB();
